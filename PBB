@@ -2,17 +2,12 @@
 <?php
 
 include ('koneksi.php');
-//include ('index.php');
-
-//$conn = sqlsrv_connect( $serverName, $connectionInfo);
 header('Content-Type: aplication/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
 header("Access-Control-Allow-Methods: GET, POST");
 $input= file_get_contents('php://input');
 $a = json_decode($input);
-//var_dump ($a);
-
 
 $inputnik = $a->NIK;
 
@@ -35,7 +30,7 @@ $l []= array
 if (empty($a->USERNAME))
 { 
   exit($j = json_encode($l));
-  //print_r($j);
+  
 }  
   else
 {  
@@ -45,7 +40,7 @@ if (empty($a->USERNAME))
 if (empty($a->PASSWORD))
 { 
   exit($j = json_encode($l));
-  //print_r($j);
+  
 }  
   else
 {  
@@ -55,7 +50,7 @@ if (empty($a->PASSWORD))
 if ($inputuser != "ptsp" or $inputpassword != "1234")
 { 
   exit($j = json_encode($l));
-  //print_r($j);
+  
 }
 
 
