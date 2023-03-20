@@ -1,0 +1,192 @@
+
+<?php
+
+include ('koneksi.php');
+//include ('index.php');
+
+//$conn = sqlsrv_connect( $serverName, $connectionInfo);
+header('Content-Type: aplication/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+header("Access-Control-Allow-Methods: GET, POST");
+$input= file_get_contents('php://input');
+$a = json_decode($input);
+//var_dump ($a);
+
+
+$inputnik = $a->NIK;
+
+
+$f []= array
+(
+  'DESKRIPSI' => 'NIK TIDAK DITEMUKAN'
+);
+
+$i = array
+(
+  'DESKRIPSI' => 'NIK tidak ada'
+);
+
+$l []= array
+(
+  'DESKRIPSI' => 'USER ID / PASSWORD SALAH'
+);
+
+if (empty($a->USERNAME))
+{ 
+  exit($j = json_encode($l));
+  //print_r($j);
+}  
+  else
+{  
+  $inputuser = $a->USERNAME;
+}
+
+if (empty($a->PASSWORD))
+{ 
+  exit($j = json_encode($l));
+  //print_r($j);
+}  
+  else
+{  
+  $inputpassword = $a->PASSWORD;
+}
+
+if ($inputuser != "ptsp" or $inputpassword != "1234")
+{ 
+  exit($j = json_encode($l));
+  //print_r($j);
+}
+
+
+$dbnik = oci_parse ($conn, 
+"SELECT A as B
+from
+(select TRIM( trailing ' ' FROM dat_subjek_pajak.SUBJEK_PAJAK_ID) AS A
+
+from 
+
+dat_subjek_pajak, dat_objek_pajak
+where 
+
+dat_subjek_pajak.subjek_pajak_id  = dat_objek_pajak.subjek_pajak_id)
+WHERE 
+A = '$inputnik'"
+);
+oci_execute($dbnik);
+//$stmt_nik = oci_parse( $conn, $dbnik);
+while($jso_nik = oci_fetch_assoc( $dbnik )) 
+  {
+    $js_nik[] = $jso_nik;
+  }
+  
+
+ //sqlsrv_close($conn);
+  if (empty($js_nik) )
+    { 
+          
+     exit($j = json_encode($f));
+     echo $j;
+     
+    }
+    
+     $dbnik = oci_parse ($conn, 
+"SELECT A as B
+from
+(select TRIM( trailing ' ' FROM dat_subjek_pajak.SUBJEK_PAJAK_ID) AS A
+
+from 
+
+dat_subjek_pajak, dat_objek_pajak
+where 
+
+dat_subjek_pajak.subjek_pajak_id  = dat_objek_pajak.subjek_pajak_id)
+WHERE 
+A = '$inputnik'"
+);
+oci_execute($dbnik);
+//$stmt_nik = oci_parse( $conn, $dbnik);
+while($jso_nik = oci_fetch_assoc( $dbnik )) 
+  {
+    $js_nik[] = $jso_nik;
+  }
+    
+    //  else 
+    // {
+    //   //$js = json_encode($js_nik);
+    //   //echo $js;
+	  $nik = $a->NIK;
+    // }
+
+
+$db = oci_parse ($conn, 
+"SELECT
+NM_WP as NAMA, TRIM ( ' ' FROM SUBJEK_PAJAK_ID) AS NIK, 
+JALAN_WP||' BLOK/KAV/NO. '||BLOK_KAV_NO_WP||' RT. '||rt_Wp||' RW. '||rw_Wp||' KOTA '||KOTA_WP as ALAMAT, 
+STATUS
+FROM
+DAT_SUBJEK_PAJAK,
+(SELECT  
+case when count (*) = 0 then 'VALID' 
+when count (*) > 0 then 'TIDAK VALID' END AS STATUS
+
+
+from dat_objek_pajak, dat_subjek_pajak, SPPT, pembayaran_sppt
+where 
+
+dat_subjek_pajak.subjek_pajak_id   = dat_objek_pajak.subjek_pajak_id (+) and
+
+sppt.kd_propinsi   = dat_objek_pajak.kd_propinsi  and
+sppt.kd_dati2 = dat_objek_pajak.kd_dati2  and
+sppt.kd_kecamatan = dat_objek_pajak.kd_kecamatan   and
+sppt.kd_kelurahan = dat_objek_pajak.kd_kelurahan  and
+sppt.kd_blok = dat_objek_pajak.kd_blok  and
+sppt.no_urut = dat_objek_pajak.no_urut  and
+sppt.kd_jns_op = dat_objek_pajak.kd_jns_op  and
+
+sppt.kd_propinsi  = pembayaran_sppt.kd_propinsi (+)   and
+sppt.kd_dati2  = pembayaran_sppt.kd_dati2  (+) and
+sppt.kd_kecamatan  = pembayaran_sppt.kd_kecamatan (+)  and
+sppt.kd_kelurahan  = pembayaran_sppt.kd_kelurahan  (+) and
+sppt.kd_blok = pembayaran_sppt.kd_blok   (+) and
+sppt.no_urut  = pembayaran_sppt.no_urut   (+) and
+sppt.kd_jns_op = pembayaran_sppt.kd_jns_op  (+)  and
+sppt.thn_pajak_sppt  = pembayaran_sppt.thn_pajak_sppt (+) and
+
+pembayaran_sppt.jml_sppt_yg_dibayar is null and
+
+dat_objek_pajak.subjek_pajak_id= '$nik')
+WHERE 
+subjek_pajak_id= '$nik'"
+);
+oci_execute($db);
+//$stmt_nik = oci_parse( $conn, $dbnik);
+while($jso = oci_fetch_assoc( $db )) 
+  {
+    $js = $jso;
+  }
+      
+
+
+    if (empty($js))
+    { 
+     //header('Content-Type: aplication/json');   
+     exit($j = json_encode($i, JSON_PRETTY_PRINT));
+    }
+ else  
+    {        
+     
+        $json = json_encode (//($js);
+        //echo $json;
+        
+            [
+             //'result' => 
+             $js
+            //'respon_code' => 'OK'
+            ]
+          );
+        print_r ($json);
+        //header('Content-Type: aplication/json'); 
+ };      
+
+?>
